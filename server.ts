@@ -17,6 +17,7 @@ import {
 
 const app = express();
 const port = Number(process.env.PORT ?? 4021);
+const host = process.env.HOST ?? "0.0.0.0";
 const payTo = requiredPayTo();
 const facilitatorUrl = process.env.FACILITATOR_URL ?? "https://x402.org/facilitator";
 const allowLiveTestnetPayments = process.env.ALLOW_LIVE_TESTNET_PAYMENTS === "1";
@@ -105,7 +106,7 @@ app.get("/healthz", (_req, res) => {
   res.json({ ok: true, x402Version: 2, network: NETWORK, livePayments: allowLiveTestnetPayments });
 });
 
-app.listen(port, "127.0.0.1", () => {
-  console.log(`x402 PropertyOps lab listening on http://127.0.0.1:${port}`);
+app.listen(port, host, () => {
+  console.log(`x402 PropertyOps lab listening on http://${host}:${port}`);
   console.log(`facilitator=${facilitatorUrl} livePayments=${allowLiveTestnetPayments}`);
 });
