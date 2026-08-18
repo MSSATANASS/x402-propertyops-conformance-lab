@@ -1,0 +1,68 @@
+{
+  "valid": {
+    "x402Version": 2,
+    "error": "PAYMENT-SIGNATURE header is required",
+    "resource": {
+      "url": "http://127.0.0.1:4021/v1/property/merida-001/maintenance-snapshot",
+      "description": "Snapshot saneado de mantenimiento",
+      "mimeType": "application/json"
+    },
+    "accepts": [
+      {
+        "scheme": "exact",
+        "network": "eip155:84532",
+        "amount": "2000",
+        "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+        "payTo": "0x1111111111111111111111111111111111111111",
+        "maxTimeoutSeconds": 60,
+        "extra": { "name": "USDC", "version": "2" }
+      }
+    ],
+    "extensions": {
+      "payment-identifier": {
+        "info": { "required": true },
+        "schema": { "type": "object" }
+      }
+    }
+  },
+  "unknownField": {
+    "x402Version": 2,
+    "resource": { "url": "http://example.test/resource" },
+    "accepts": [
+      {
+        "scheme": "exact",
+        "network": "eip155:84532",
+        "amount": "2000",
+        "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+        "payTo": "0x1111111111111111111111111111111111111111",
+        "unexpected": "must-be-reported"
+      }
+    ],
+    "unexpectedTopLevel": true
+  },
+  "plainNetwork": {
+    "x402Version": 2,
+    "resource": { "url": "http://example.test/resource" },
+    "accepts": [
+      {
+        "scheme": "exact",
+        "network": "base-sepolia",
+        "amount": "2000",
+        "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+        "payTo": "0x1111111111111111111111111111111111111111"
+      }
+    ]
+  },
+  "emptyAccepts": {
+    "x402Version": 2,
+    "resource": { "url": "http://example.test/resource" },
+    "accepts": []
+  },
+  "legacyBodyOnly": {
+    "x402Version": 1,
+    "maxAmountRequired": "2000",
+    "resource": "http://example.test/resource",
+    "payTo": "0x1111111111111111111111111111111111111111",
+    "network": "base-sepolia"
+  }
+}

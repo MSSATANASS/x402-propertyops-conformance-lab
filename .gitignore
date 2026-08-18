@@ -1,0 +1,9 @@
+node_modules/
+dist/
+!vendor/*/dist/
+!vendor/*/dist/**
+.env
+reports/*.json
+scripts/__pycache__/
+*.log
+.DS_Store

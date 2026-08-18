@@ -1,0 +1,160 @@
+{
+  "info": {
+    "name": "x402 PropertyOps Conformance Lab",
+    "description": "Colección read-only para validar discovery x402 v2, el probe frío HTTP 402 y la protección del laboratorio. No incluye PAYMENT-SIGNATURE ni ejecuta pagos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - Discovery manifest",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/.well-known/x402",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            ".well-known",
+            "x402"
+          ]
+        },
+        "description": "Obtiene el manifest de discovery sin autenticación ni pago."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Discovery responde 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Manifest es x402 v2', function () {",
+              "  pm.expect(body.x402Version).to.eql(2);",
+              "});",
+              "pm.test('Manifest publica accepts por recurso', function () {",
+              "  pm.expect(body.resources).to.be.an('array').that.is.not.empty;",
+              "  pm.expect(body.resources[0].accepts).to.be.an('array').that.is.not.empty;",
+              "});",
+              "pm.test('Manifest usa CAIP-2 y exact', function () {",
+              "  const acceptance = body.resources[0].accepts[0];",
+              "  pm.expect(acceptance.scheme).to.eql('exact');",
+              "  pm.expect(acceptance.network).to.match(/^[a-z0-9-]+:[A-Za-z0-9_-]+$/);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Cold probe PaymentRequired",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/property/{{propertyId}}/maintenance-snapshot",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "property",
+            "{{propertyId}}",
+            "maintenance-snapshot"
+          ]
+        },
+        "description": "Probe sin PAYMENT-SIGNATURE. El resultado esperado es HTTP 402 con header PAYMENT-REQUIRED v2."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Cold probe responde 402', function () {",
+              "  pm.response.to.have.status(402);",
+              "});",
+              "pm.test('No se envió PAYMENT-SIGNATURE', function () {",
+              "  pm.expect(pm.request.headers.has('PAYMENT-SIGNATURE')).to.eql(false);",
+              "});",
+              "const encoded = pm.response.headers.get('PAYMENT-REQUIRED');",
+              "pm.test('Existe PAYMENT-REQUIRED', function () {",
+              "  pm.expect(encoded).to.be.a('string').and.not.empty;",
+              "});",
+              "let requirements;",
+              "try { requirements = JSON.parse(atob(encoded)); } catch (error) { requirements = null; }",
+              "pm.test('PAYMENT-REQUIRED decodifica como JSON v2', function () {",
+              "  pm.expect(requirements).to.be.an('object');",
+              "  pm.expect(requirements.x402Version).to.eql(2);",
+              "});",
+              "pm.test('Requisito usa exact, CAIP-2 y amount esperado', function () {",
+              "  const acceptance = requirements.accepts[0];",
+              "  pm.expect(acceptance.scheme).to.eql('exact');",
+              "  pm.expect(acceptance.network).to.eql('eip155:84532');",
+              "  pm.expect(acceptance.amount).to.eql('2000');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Health and live payment guard",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/healthz",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "healthz"
+          ]
+        },
+        "description": "Confirma que el servidor local está activo y que los pagos live siguen deshabilitados."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Health responde 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Servidor reporta x402 v2', function () {",
+              "  pm.expect(body.x402Version).to.eql(2);",
+              "});",
+              "pm.test('Pagos live deshabilitados', function () {",
+              "  pm.expect(body.livePayments).to.eql(false);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "protocolProfileBehavior": {
+    "followRedirects": false
+  }
+}

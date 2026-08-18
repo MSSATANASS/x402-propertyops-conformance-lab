@@ -1,0 +1,32 @@
+{
+  "name": "x402-propertyops-conformance-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local x402 v2 PropertyOps conformance and safety lab",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "start": "tsx --env-file=.env server.ts",
+    "probe": "tsx scripts/probe.ts",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@x402/core": "2.22.0",
+    "@x402/evm": "2.22.0",
+    "@x402/express": "2.22.0",
+    "@x402/extensions": "2.22.0",
+    "@x402/fetch": "2.22.0",
+    "@mssatanass/flare-sdk": "file:vendor/flare-sdk",
+    "express": "4.21.2",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.3",
+    "@types/node": "22.15.3",
+    "tsx": "4.19.3",
+    "typescript": "5.8.3",
+    "vitest": "3.1.1"
+  }
+}
